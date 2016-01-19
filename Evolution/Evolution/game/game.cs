@@ -83,7 +83,7 @@
 
             return averageLivingCell;
         }
-
+        //comment
         //private int GetNbNeighbors(int x, int y)
         //{
         //    int nbNeighbors = 0;

@@ -1,16 +1,18 @@
-﻿namespace Evolution.game
+﻿using System;
+
+namespace Evolution.game
 {
     public class Game
     {
         private const int MaxTurn = 500;
-        private const int boardSize = 500;
-        private bool[,] _array = new bool[boardSize, boardSize];
+        private const int BoardSize = 500;
+        private readonly bool[,] _array = new bool[BoardSize, BoardSize];
 
         public void ReinitBoard()
         {
-            for (int i = 0; i < boardSize - 1; i++)
+            for (int i = 0; i < BoardSize - 1; i++)
             {
-                for (int j = 0; j < boardSize - 1; j++)
+                for (int j = 0; j < BoardSize - 1; j++)
                 {
                     _array[i, j] = false;
                 }
@@ -19,9 +21,9 @@
 
         public void InitBoard()
         {
-            for (int i = 0; i < boardSize - 1; i++)
+            for (int i = 0; i < BoardSize - 1; i++)
             {
-                for (int j = 0; j < boardSize - 1; j++)
+                for (int j = 0; j < BoardSize - 1; j++)
                 {
                     _array[i, j] = new bool();
                 }
@@ -36,9 +38,9 @@
 
             for (int t = 0; t < MaxTurn; t++)
             {
-                for (int i = 0; i < boardSize - 1; i++)
+                for (int i = 0; i < BoardSize - 1; i++)
                 {
-                    for (int j = 0; j < boardSize - 1; j++)
+                    for (int j = 0; j < BoardSize - 1; j++)
                     {
                         switch (GetNbNeighbors(i, j))
                         {
@@ -62,9 +64,10 @@
                         }
                     }
                 }
+                Console.WriteLine(averageLivingCell / MaxTurn);
             }
 
-            return averageLivingCell;
+            return averageLivingCell/MaxTurn;
         }
 
         private int GetNbNeighbors(int x, int y)
@@ -72,16 +75,12 @@
             int nbNeighbors = 0;
             for (int i = x - 1; i < x + 1; i++)
             {
-                if (x != 0 && x == boardSize - 1)
+                if (x == 0 || x != BoardSize - 1) continue;
+                for (int j = y - 1; j < y + 1; j++)
                 {
-                    for (int j = y - 1; j < y + 1; j++)
-                    {
-                        if (y != 0 && y == boardSize - 1)
-                        {
-                            if (_array[i, j])
-                                nbNeighbors++;
-                        }
-                    }
+                    if (y == 0 || y != BoardSize - 1) continue;
+                    if (_array[i, j])
+                        nbNeighbors++;
                 }
             }
             return nbNeighbors;

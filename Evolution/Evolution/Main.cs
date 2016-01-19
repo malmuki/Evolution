@@ -11,7 +11,7 @@ namespace Evolution
             game.InitBoard();
             game.SetLiving(new Pos[]
             {
-                new Pos(){X = 0,Y=0}, new Pos(){X = 0,Y=1}, new Pos(){X = 0,Y=2}
+                new Pos(){X = 1,Y=1}, new Pos(){X = 1,Y=2}, new Pos(){X = 1,Y=3}
             });
             game.StartGame();
         }

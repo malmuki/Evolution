@@ -4,11 +4,20 @@ namespace Evolution.game
 {
     public class Game
     {
-        private const int MaxTurn = 30;
+        private const int MaxTurn = 300;
         private const int BoardSize = 60;
         private Cell[,] _array = new Cell[BoardSize, BoardSize];
-        private Pos[] _neighborsNavigator;
+        private Pos[] _neighborsNavigator = new Pos[] {new Pos{X = -1, Y = -1},
+                                            new Pos{X = -1, Y = 0},
+                                            new Pos{X = -1, Y = 1},
+                                            new Pos{X = 0, Y = -1},
+                                            new Pos{X = 0, Y = 1},
+                                            new Pos{X = 1, Y = -1},
+                                            new Pos{X = 1, Y = 0},
+                                            new Pos{X = 1, Y = 1},
+                                            };
 
+        //Clean the grid between simulations
         public void ReinitBoard()
         {
             for (int i = 0; i < BoardSize - 1; i++)
@@ -21,9 +30,9 @@ namespace Evolution.game
             }
         }
 
+        //For means of optimisation, call only once to setup the grid's Cells. To clean between simulations instead use ReinitBoard()
         public void InitBoard()
         {
-            InitNeighborsNavigator();
             for (int i = 0; i < BoardSize; i++)
             {
                 for (int j = 0; j < BoardSize; j++)
@@ -42,69 +51,24 @@ namespace Evolution.game
             }
         }
 
-        private DateTime _span;
-
-        public void StartGame()
+        
+        //Game loop for a unique simulation whose starting living cells are determined by the startBoard parameter
+        //Will eventually return average number of live cells during simulation
+        public void StartGame(Pos[] startBoard)
         {
-            _span = DateTime.Now;
-            int averageLivingCell = 0;
-
-            Cell[,] buffer = _array;
+            SetLiving(startBoard);
+            DateTime _span = DateTime.Now;
+            int totalLiveCellsOfSimulation = 0;
 
             for (int t = 0; t < MaxTurn; t++)
             {
-                System.Threading.Thread.Sleep(250);
+                System.Threading.Thread.Sleep(200);
                 Console.Clear();
-                SetNbNeighbors();
-                for (int i = 0; i < BoardSize ; i++)
-                {
-                    for (int j = 0; j < BoardSize; j++)
-                    {
-                        switch (_array[i, j].Neighbors)
-                        {
-                            case 0:
-                            case 1:
-                                buffer[i, j].IsAlive = false;
-                                break;
 
-                            case 2:
-                                if (_array[i, j].IsAlive)
-                                    averageLivingCell++;
-                                break;
+                totalLiveCellsOfSimulation += generateFrame();
+                showNewFrame();
 
-                            case 3:
-                                buffer[i, j].IsAlive = true;
-                                averageLivingCell++;
-                                break;
-
-                            default:
-                                buffer[i, j].IsAlive = false;
-                                break;
-                        }
-                    }
-                }
-                _array = buffer;
-                string bigString = "";
-
-                for (int i = 0; i < BoardSize; i++)
-                {
-                    for (int j = 0; j < BoardSize; j++)//▒ █
-
-                    {
-                        if (_array[j, i].IsAlive)
-                        {
-                            bigString += "█";
-                        } else {
-                            bigString += "▒";
-                        }
-                        //bigString += Convert.ToInt32(_array[j, i].IsAlive);
-                    }
-                    Console.WriteLine(bigString);
-                    bigString = "";
-                }
-
-
-                Console.WriteLine(averageLivingCell / (t + 1));
+                Console.WriteLine(totalLiveCellsOfSimulation / (t + 1));
             }
 
             Console.WriteLine(DateTime.Now - _span);
@@ -112,15 +76,80 @@ namespace Evolution.game
             //return averageLivingCell / MaxTurn;
         }
 
-        private void SetNbNeighbors()
+
+        //Render and show the next frame
+        private void showNewFrame()
         {
+            string renderedLine = "";
+
             for (int i = 0; i < BoardSize; i++)
             {
                 for (int j = 0; j < BoardSize; j++)
                 {
-                    _array[i, j].Neighbors = 0;
+                    if (_array[j, i].IsAlive)
+                    {
+                        renderedLine += "█";
+                    }
+                    else
+                    {
+                        renderedLine += "▒";
+                    }
+                }
+                Console.WriteLine(renderedLine);
+                renderedLine = "";
+            }
+        }
+
+        //Generate next frame's game state and assign it to _array. 
+        //Returns the number of living cells of the current frame
+        private int generateFrame()
+        {
+            DetermineNbOfNeighbors();
+            return applyRules();
+        }
+
+        //Apply the rules 
+        //Returns the number of living cells of the current frame
+        private int applyRules()
+        {
+            Cell[,] buffer = _array;
+            int liveCellsOfFrame = 0;
+
+            for (int i = 0; i < BoardSize; i++)
+            {
+                for (int j = 0; j < BoardSize; j++)
+                {
+                    switch (_array[i, j].Neighbors)
+                    {
+                        case 0:
+                        case 1:
+                            buffer[i, j].IsAlive = false;
+                            break;
+
+                        case 2:
+                            if (_array[i, j].IsAlive)
+                                ++liveCellsOfFrame;
+                            break;
+
+                        case 3:
+                            buffer[i, j].IsAlive = true;
+                            ++liveCellsOfFrame;
+                            break;
+
+                        default:
+                            buffer[i, j].IsAlive = false;
+                            break;
+                    }
                 }
             }
+            _array = buffer;
+            return liveCellsOfFrame;
+        }
+
+        //Parse the grid to set each cell's number of neighbors
+        private void DetermineNbOfNeighbors()
+        {
+            resetNumberOfNeighbors();
 
             foreach (Cell cell in _array)
             {
@@ -137,29 +166,20 @@ namespace Evolution.game
             }
         }
 
-        private void InitNeighborsNavigator()
+        //Reset the numbere of neighbors of all the cells in the grid
+        private void resetNumberOfNeighbors()
         {
-            _neighborsNavigator = new Pos[] {new Pos{X = -1, Y = -1},
-                                            new Pos{X = -1, Y = 0},
-                                            new Pos{X = -1, Y = 1},
-                                            new Pos{X = 0, Y = -1},
-                                            new Pos{X = 0, Y = 1},
-                                            new Pos{X = 1, Y = -1},
-                                            new Pos{X = 1, Y = 0},
-                                            new Pos{X = 1, Y = 1},
-                                           };
+            for (int i = 0; i < BoardSize; i++)
+            {
+                for (int j = 0; j < BoardSize; j++)
+                {
+                    _array[i, j].Neighbors = 0;
+                }
+            }
         }
 
-        //private int GetNbNeighbors(int x, int y)
-        //{
-        //    int nbNeighbors = 0;
-
-        //
-
-        //    return nbNeighbors;
-        //}
-
-        public void SetLiving(Pos[] startBoard)
+        //Set the state of Cells whose position correspond to the given parameter's X-Y coordinates
+        private void SetLiving(Pos[] startBoard)
         {
             foreach (Pos pos in startBoard)
             {

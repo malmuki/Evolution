@@ -4,11 +4,10 @@ namespace Evolution.game
 {
     public class Game
     {
-        private const int MaxTurn = 3;
-        private const int BoardSize = 3;
+        private const int MaxTurn = 30;
+        private const int BoardSize = 60;
         private Cell[,] _array = new Cell[BoardSize, BoardSize];
         private Pos[] _neighborsNavigator;
-        private Visual UI;
 
         public void ReinitBoard()
         {
@@ -20,12 +19,10 @@ namespace Evolution.game
                     _array[i, j].Neighbors = 0;
                 }
             }
-            UI.Update(_array);
         }
 
-        public void InitBoard(Visual _uiVisual)
+        public void InitBoard()
         {
-            UI = _uiVisual;
             InitNeighborsNavigator();
             for (int i = 0; i < BoardSize; i++)
             {
@@ -43,7 +40,6 @@ namespace Evolution.game
                     };
                 }
             }
-            UI.Update(_array);
         }
 
         private DateTime _span;
@@ -57,6 +53,8 @@ namespace Evolution.game
 
             for (int t = 0; t < MaxTurn; t++)
             {
+                System.Threading.Thread.Sleep(250);
+                Console.Clear();
                 SetNbNeighbors();
                 for (int i = 0; i < BoardSize ; i++)
                 {
@@ -86,9 +84,29 @@ namespace Evolution.game
                     }
                 }
                 _array = buffer;
+                string bigString = "";
+
+                for (int i = 0; i < BoardSize; i++)
+                {
+                    for (int j = 0; j < BoardSize; j++)//▒ █
+
+                    {
+                        if (_array[j, i].IsAlive)
+                        {
+                            bigString += "█";
+                        } else {
+                            bigString += "▒";
+                        }
+                        //bigString += Convert.ToInt32(_array[j, i].IsAlive);
+                    }
+                    Console.WriteLine(bigString);
+                    bigString = "";
+                }
+
+
                 Console.WriteLine(averageLivingCell / (t + 1));
-                UI.Update(_array);
             }
+
             Console.WriteLine(DateTime.Now - _span);
             Console.Read();
             //return averageLivingCell / MaxTurn;

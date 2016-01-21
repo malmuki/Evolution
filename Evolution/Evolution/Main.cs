@@ -1,4 +1,5 @@
 ﻿using Evolution.game;
+using System.Threading;
 
 namespace Evolution
 {
@@ -7,13 +8,17 @@ namespace Evolution
         public static void Main(string[] args)
         {
             Game game = new Game();
+            Visual UI = new Visual();
 
-            game.InitBoard();
+            game.InitBoard(UI);
             game.SetLiving(new Pos[]
             {
-                new Pos(){X = 1,Y=1}, new Pos(){X = 1,Y=2}, new Pos(){X = 1,Y=3}
+                new Pos{X = 1,Y=0}, new Pos(){X = 1,Y=1}, new Pos(){X = 1,Y=2}
             });
-            game.StartGame();
+
+            Thread oThread = new Thread(new ThreadStart(game.StartGame));
+
+            oThread.Start();
         }
     }
 }

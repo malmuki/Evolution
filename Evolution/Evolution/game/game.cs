@@ -4,10 +4,11 @@ namespace Evolution.game
 {
     public class Game
     {
-        private const int MaxTurn = 500;
-        private const int BoardSize = 100;
-        private bool[,] _array = new bool[BoardSize, BoardSize];
-        private Pos[] neighborsNavigator;
+        private const int MaxTurn = 3;
+        private const int BoardSize = 3;
+        private Cell[,] _array = new Cell[BoardSize, BoardSize];
+        private Pos[] _neighborsNavigator;
+        private Visual UI;
 
         public void ReinitBoard()
         {
@@ -15,112 +16,112 @@ namespace Evolution.game
             {
                 for (int j = 0; j < BoardSize - 1; j++)
                 {
-                    _array[i, j] = false;
+                    _array[i, j].IsAlive = false;
+                    _array[i, j].Neighbors = 0;
                 }
             }
+            UI.Update(_array);
         }
 
-        public void InitBoard()
+        public void InitBoard(Visual _uiVisual)
         {
-            initNeighborsNavigator();
-            for (int i = 0; i < BoardSize - 1; i++)
+            UI = _uiVisual;
+            InitNeighborsNavigator();
+            for (int i = 0; i < BoardSize; i++)
             {
-                for (int j = 0; j < BoardSize - 1; j++)
+                for (int j = 0; j < BoardSize; j++)
                 {
-                    _array[i, j] = new bool();
+                    _array[i, j] = new Cell
+                    {
+                        IsAlive = false,
+                        Neighbors = 0,
+                        Pos = new Pos
+                        {
+                            X = i,
+                            Y = j
+                        }
+                    };
                 }
             }
+            UI.Update(_array);
         }
 
-        private DateTime span;
+        private DateTime _span;
 
-        public int StartGame()
+        public void StartGame()
         {
-            span = DateTime.Now;
+            _span = DateTime.Now;
             int averageLivingCell = 0;
 
-            bool[,] buffer = _array;
+            Cell[,] buffer = _array;
 
             for (int t = 0; t < MaxTurn; t++)
             {
-                for (int i = 0; i < BoardSize - 1; i++)
+                SetNbNeighbors();
+                for (int i = 0; i < BoardSize ; i++)
                 {
-                    for (int j = 0; j < BoardSize - 1; j++)
+                    for (int j = 0; j < BoardSize; j++)
                     {
-                        switch (GetNbNeighbors(i, j))
+                        switch (_array[i, j].Neighbors)
                         {
                             case 0:
                             case 1:
-                                buffer[i, j] = false;
+                                buffer[i, j].IsAlive = false;
                                 break;
 
                             case 2:
-                                if (_array[i, j])
+                                if (_array[i, j].IsAlive)
                                     averageLivingCell++;
                                 break;
 
                             case 3:
-                                buffer[i, j] = true;
+                                buffer[i, j].IsAlive = true;
                                 averageLivingCell++;
                                 break;
 
                             default:
-                                buffer[i, j] = false;
+                                buffer[i, j].IsAlive = false;
                                 break;
                         }
                     }
                 }
                 _array = buffer;
                 Console.WriteLine(averageLivingCell / (t + 1));
+                UI.Update(_array);
             }
-            Console.WriteLine(DateTime.Now - span);
+            Console.WriteLine(DateTime.Now - _span);
             Console.Read();
-            return averageLivingCell / MaxTurn;
+            //return averageLivingCell / MaxTurn;
         }
 
-        private int GetNbNeighbors(int x, int y)
+        private void SetNbNeighbors()
         {
-            int nbNeighbors = 0;
-            for (int i = x - 1; i <= x + 1; i++)
+            for (int i = 0; i < BoardSize; i++)
             {
-                if (i == -1 && i != BoardSize) continue;
-                for (int j = y - 1; j <= y + 1; j++)
+                for (int j = 0; j < BoardSize; j++)
                 {
-                    if (j == -1 && j != BoardSize) continue;
-                    if (!(i == x && j == y) && _array[i, j])
-                        nbNeighbors++;
+                    _array[i, j].Neighbors = 0;
                 }
             }
 
-            return nbNeighbors;
-        }
-
-        //private int GetNbNeighbors(int x, int y)
-        //{
-        //    int nbNeighbors = 0;
-
-        //    foreach (Pos pos in neighborsNavigator)
-        //    {
-        //        if ((x + pos.X >= 0 && x + pos.X <= BoardSize - 1) && (y + pos.Y <= BoardSize - 1 && y + pos.Y >= 0) && (_array[x + pos.X, y + pos.Y]))
-        //        {
-        //            ++nbNeighbors;
-        //        }
-        //    }
-
-        //    return nbNeighbors;
-        //}
-
-        public void SetLiving(Pos[] startBoard)
-        {
-            foreach (Pos pos in startBoard)
+            foreach (Cell cell in _array)
             {
-                _array[pos.X, pos.Y] = true;
+                if (cell.IsAlive)
+                {
+                    foreach (Pos pos in _neighborsNavigator)
+                    {
+                        if ((cell.Pos.X + pos.X >= 0 && cell.Pos.X + pos.X <= BoardSize - 1) && (cell.Pos.Y + pos.Y <= BoardSize - 1 && cell.Pos.Y + pos.Y >= 0))
+                        {
+                            _array[cell.Pos.X + pos.X, cell.Pos.Y + pos.Y].Neighbors++;
+                        }
+                    }
+                }
             }
         }
 
-        private void initNeighborsNavigator()
+        private void InitNeighborsNavigator()
         {
-            neighborsNavigator = new Pos[] {new Pos{X = -1, Y = -1},
+            _neighborsNavigator = new Pos[] {new Pos{X = -1, Y = -1},
                                             new Pos{X = -1, Y = 0},
                                             new Pos{X = -1, Y = 1},
                                             new Pos{X = 0, Y = -1},
@@ -130,11 +131,35 @@ namespace Evolution.game
                                             new Pos{X = 1, Y = 1},
                                            };
         }
+
+        //private int GetNbNeighbors(int x, int y)
+        //{
+        //    int nbNeighbors = 0;
+
+        //
+
+        //    return nbNeighbors;
+        //}
+
+        public void SetLiving(Pos[] startBoard)
+        {
+            foreach (Pos pos in startBoard)
+            {
+                _array[pos.X, pos.Y].IsAlive = true;
+            }
+        }
     }
 
     public struct Pos
     {
         public int X;
         public int Y;
+    }
+
+    public struct Cell
+    {
+        public Pos Pos;
+        public bool IsAlive;
+        public int Neighbors;
     }
 }

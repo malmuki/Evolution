@@ -66,7 +66,8 @@ namespace Evolution.game
                 Console.Clear();
 
                 totalLiveCellsOfSimulation += generateFrame();
-                showNewFrame();
+                showNewFrame(); //without pausing the thread and showing frames, time spent on a simulation is 0.07 ish seconds, while 
+                                //time spent on a simulation with graphics seems to be of 0.9 ish seconds
 
                 Console.WriteLine(totalLiveCellsOfSimulation / (t + 1));
             }
@@ -186,6 +187,13 @@ namespace Evolution.game
                 _array[pos.X, pos.Y].IsAlive = true;
             }
         }
+
+        private struct Cell
+        {
+            public Pos Pos;
+            public bool IsAlive;
+            public int Neighbors;
+        }
     }
 
     public struct Pos
@@ -194,10 +202,5 @@ namespace Evolution.game
         public int Y;
     }
 
-    public struct Cell
-    {
-        public Pos Pos;
-        public bool IsAlive;
-        public int Neighbors;
-    }
+
 }

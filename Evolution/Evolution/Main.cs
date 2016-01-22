@@ -10,7 +10,7 @@ namespace Evolution
             Game game = new Game();
             game.InitBoard();
 
-            //Living cells at the start of the simulation
+            //Living cells at the start of simulation
             Pos[] startBoard = new Pos[]{new Pos{X = 1,Y=0}, new Pos(){X = 1,Y=1}, new Pos(){X = 1,Y=2}}; 
 
             game.StartGame(startBoard);

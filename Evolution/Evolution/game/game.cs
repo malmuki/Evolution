@@ -4,7 +4,7 @@ namespace Evolution.game
 {
     public class Game
     {
-        private const int MaxTurn = 300;
+        private const int MaxTurn = 400;
         private const int BoardSize = 60;
         private Cell[,] _array = new Cell[BoardSize, BoardSize];
         private Pos[] _neighborsNavigator = new Pos[] {new Pos{X = -1, Y = -1},

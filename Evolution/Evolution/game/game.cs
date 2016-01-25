@@ -54,7 +54,7 @@ namespace Evolution.game
         
         //Game loop for a unique simulation whose starting living cells are determined by the startBoard parameter
         //Will eventually return average number of live cells during simulation
-        public void StartGame(Pos[] startBoard)
+        public int StartGame(string startBoard)
         {
             SetLiving(startBoard);
             DateTime _span = DateTime.Now;
@@ -62,19 +62,19 @@ namespace Evolution.game
 
             for (int t = 0; t < MaxTurn; t++)
             {
-                System.Threading.Thread.Sleep(200);
-                Console.Clear();
+                //System.Threading.Thread.Sleep(10);
+                //Console.Clear();
 
                 totalLiveCellsOfSimulation += generateFrame();
-                showNewFrame(); //without pausing the thread and showing frames, time spent on a simulation is 0.07 ish seconds, while 
+                //showNewFrame(); //without pausing the thread and showing frames, time spent on a simulation is 0.07 ish seconds, while 
                                 //time spent on a simulation with graphics seems to be of 0.9 ish seconds
 
-                Console.WriteLine(totalLiveCellsOfSimulation / (t + 1));
+                //Console.WriteLine(totalLiveCellsOfSimulation / (t + 1));
             }
-
-            Console.WriteLine(DateTime.Now - _span);
-            Console.Read();
-            //return averageLivingCell / MaxTurn;
+            Console.WriteLine(totalLiveCellsOfSimulation / MaxTurn);
+            //Console.WriteLine(DateTime.Now - _span);
+            //Console.Read();
+            return totalLiveCellsOfSimulation / MaxTurn;
         }
 
 
@@ -180,11 +180,13 @@ namespace Evolution.game
         }
 
         //Set the state of Cells whose position correspond to the given parameter's X-Y coordinates
-        private void SetLiving(Pos[] startBoard)
+        private void SetLiving(string startBoardString)
         {
-            foreach (Pos pos in startBoard)
-            {
-                _array[pos.X, pos.Y].IsAlive = true;
+            for (int i = 0; i < 20; i++){
+                for (int j = 0; j < 20; j++)
+                {
+                    _array[i + 20, j + 20].IsAlive = (startBoardString[i * 20 + j] == '1');
+                }
             }
         }
 

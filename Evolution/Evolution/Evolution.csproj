@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\EvolutionAI.cs" />
     <Compile Include="game\Game.cs" />
     <Compile Include="main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -88,13 +88,13 @@ namespace Evolution.AI
                 newPopulation.Add(new KeyValuePair<string, int>(parent1.Substring(0, crossOverPoint) + pair.Key.Substring(crossOverPoint, 400 - crossOverPoint), 0));
                 newPopulation.Add(new KeyValuePair<string, int>(pair.Key.Substring(0, crossOverPoint) + parent1.Substring(crossOverPoint, 400 - crossOverPoint), 0));
 
-                //crossOverPoint = RNG.Next(1, 400);
-                //newPopulation.Add(new KeyValuePair<string, int>(parent1.Substring(0, crossOverPoint) + pair.Key.Substring(crossOverPoint, 400 - crossOverPoint), 0));
-                //newPopulation.Add(new KeyValuePair<string, int>(pair.Key.Substring(0, crossOverPoint) + parent1.Substring(crossOverPoint, 400 - crossOverPoint), 0));
+                crossOverPoint = RNG.Next(1, 400);
+                newPopulation.Add(new KeyValuePair<string, int>(parent1.Substring(0, crossOverPoint) + pair.Key.Substring(crossOverPoint, 400 - crossOverPoint), 0));
+                newPopulation.Add(new KeyValuePair<string, int>(pair.Key.Substring(0, crossOverPoint) + parent1.Substring(crossOverPoint, 400 - crossOverPoint), 0));
 
                 //to reintroduce parents in next generation
-                newPopulation.Add(new KeyValuePair<string, int>(pair.Key, 0));
-                newPopulation.Add(new KeyValuePair<string, int>(parent1, 0));
+                //newPopulation.Add(new KeyValuePair<string, int>(pair.Key, 0));
+                //newPopulation.Add(new KeyValuePair<string, int>(parent1, 0));
 
                 parent1 = "";
             }
@@ -135,11 +135,8 @@ namespace Evolution.AI
                 location = RNG.Next(0, 400);
                 if (_originalSeed[location] == '1')
                 {
-                    int k = mutatedString.Length;
                     mutatedString = mutatedString.Remove(location, 1);
-                    int j = mutatedString.Length;
                     mutatedString = mutatedString.Insert(location, "0");
-                    int p = mutatedString.Length;
                 }
                 else
                 {

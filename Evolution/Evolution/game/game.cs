@@ -68,10 +68,8 @@ namespace Evolution.game
                 totalLiveCellsOfSimulation += generateFrame();
                 //showNewFrame(); //without pausing the thread and showing frames, time spent on a simulation is 0.07 ish seconds, while 
                                 //time spent on a simulation with graphics seems to be of 0.9 ish seconds
-
-                //Console.WriteLine(totalLiveCellsOfSimulation / (t + 1));
             }
-            Console.WriteLine(totalLiveCellsOfSimulation / MaxTurn);
+            Console.WriteLine("Simulation  finished, number of cells: " + totalLiveCellsOfSimulation / MaxTurn);
             //Console.WriteLine(DateTime.Now - _span);
             //Console.Read();
             return totalLiveCellsOfSimulation / MaxTurn;

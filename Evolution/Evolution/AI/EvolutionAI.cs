@@ -17,7 +17,9 @@ namespace Evolution.AI
 
         private const int START_ZONE_WIDTH = 20;
         private const int START_ZONE_HEIGHT = 20;
-        private const int POPULATION_SIZE = 44;
+        private const int POPULATION_SIZE = 52;
+        private const int MIN_NB_OF_MUTATION = 0;
+        private const int MAX_NB_OF_MUTATION = 6;
         private Random RNG = new Random();
 
         private List<KeyValuePair<string, int>> population;
@@ -35,23 +37,29 @@ namespace Evolution.AI
 
         public void startEvolution(int _nbOfGeneration)
         {
-            GenerateRandomPopulation();            
-
+            GenerateRandomPopulation();
+            int totalGenFitness;
+            int fitnessScore;
             for (int i = 0; i < _nbOfGeneration; i++)
             {
+                totalGenFitness = 0;
+                fitnessScore = 0;
                 Console.WriteLine("========== GENERATION " + i + " ==========");
                 populationBuffer = new List<KeyValuePair<string, int>>(population);
                 Console.WriteLine("NB of individuals: " + populationBuffer.Count);
                 foreach (var pair in populationBuffer)
                 {
                     game.ReinitBoard();
-                    setValueFromKey(pair.Key, game.StartGame(pair.Key), population);
+                    fitnessScore = game.StartGame(pair.Key);
+                    totalGenFitness += fitnessScore;
+                    setValueFromKey(pair.Key, fitnessScore, population);
                 }
 
                 SelectPopulation();
                 CrossPopulation();
                 applyMutations();
                 newPopulation = new List<KeyValuePair<string, int>>();
+                Console.WriteLine("Average generation fitness: " + totalGenFitness / POPULATION_SIZE);
             }
         }
 
@@ -88,13 +96,13 @@ namespace Evolution.AI
                 newPopulation.Add(new KeyValuePair<string, int>(parent1.Substring(0, crossOverPoint) + pair.Key.Substring(crossOverPoint, 400 - crossOverPoint), 0));
                 newPopulation.Add(new KeyValuePair<string, int>(pair.Key.Substring(0, crossOverPoint) + parent1.Substring(crossOverPoint, 400 - crossOverPoint), 0));
 
-                crossOverPoint = RNG.Next(1, 400);
-                newPopulation.Add(new KeyValuePair<string, int>(parent1.Substring(0, crossOverPoint) + pair.Key.Substring(crossOverPoint, 400 - crossOverPoint), 0));
-                newPopulation.Add(new KeyValuePair<string, int>(pair.Key.Substring(0, crossOverPoint) + parent1.Substring(crossOverPoint, 400 - crossOverPoint), 0));
+                //crossOverPoint = RNG.Next(1, 400);
+                //newPopulation.Add(new KeyValuePair<string, int>(parent1.Substring(0, crossOverPoint) + pair.Key.Substring(crossOverPoint, 400 - crossOverPoint), 0));
+                //newPopulation.Add(new KeyValuePair<string, int>(pair.Key.Substring(0, crossOverPoint) + parent1.Substring(crossOverPoint, 400 - crossOverPoint), 0));
 
                 //to reintroduce parents in next generation
-                //newPopulation.Add(new KeyValuePair<string, int>(pair.Key, 0));
-                //newPopulation.Add(new KeyValuePair<string, int>(parent1, 0));
+                newPopulation.Add(new KeyValuePair<string, int>(pair.Key, 0));
+                newPopulation.Add(new KeyValuePair<string, int>(parent1, 0));
 
                 parent1 = "";
             }
@@ -107,26 +115,33 @@ namespace Evolution.AI
         private void applyMutations()
         {
             population = new List<KeyValuePair<string, int>>();
+            KeyValuePair<string, int> bestSeed = new KeyValuePair<string, int>("", 0);
 
-            int i = 0;
-            foreach (var pair in populationBuffer.OrderBy(j => j.Value))
+            for (int i = 0; i < populationBuffer.Count; i++)
             {
-                if (i == 1)
+                if (populationBuffer[i].Value > bestSeed.Value)
                 {
-                    population.Add(new KeyValuePair<string, int>(populationBuffer[i].Key, 0));
-                    i++;
-                    continue;
+                    bestSeed = new KeyValuePair<string, int>(populationBuffer[i].Key, populationBuffer[i].Value);
                 }
+            }
 
+            //TODO REMOVE THIS
+            //game.ReinitBoard();
+            //game.ShowGame(bestSeed.Key);
+            //
+            Console.WriteLine("Best fitness of generation: " + bestSeed.Value);
+            removeFromKey(bestSeed.Key, populationBuffer);
+            population.Add(new KeyValuePair<string, int>(bestSeed.Key, 0));
+
+            for (int i = 0; i < populationBuffer.Count; i++)
+            {
                 population.Add(new KeyValuePair<string, int>(mutateSeed(populationBuffer[i].Key), 0));
-
-                i++;
             }
         }
 
         private string mutateSeed(string _originalSeed)
         {
-            int numberOfMutation = RNG.Next(1, 10);
+            int numberOfMutation = RNG.Next(MIN_NB_OF_MUTATION, MAX_NB_OF_MUTATION);
             int location = 0;
             string mutatedString = _originalSeed;
 
@@ -140,8 +155,8 @@ namespace Evolution.AI
                 }
                 else
                 {
-                    mutatedString.Remove(location, 1);
-                    mutatedString.Insert(location, "1");
+                    mutatedString = mutatedString.Remove(location, 1);
+                    mutatedString = mutatedString.Insert(location, "1");
                 }
             }
 
@@ -201,6 +216,7 @@ namespace Evolution.AI
                 {
                     list.Add(new KeyValuePair<string,int>(key,value));
                     list.RemoveAt(i);
+                    return;
                 }
             }
         }

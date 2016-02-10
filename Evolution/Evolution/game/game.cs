@@ -4,7 +4,7 @@ namespace Evolution.game
 {
     public class Game
     {
-        private const int MaxTurn = 400;
+        private const int MaxTurn = 600;
         private const int BoardSize = 60;
         private Cell[,] _array = new Cell[BoardSize, BoardSize];
         private Pos[] _neighborsNavigator = new Pos[] {new Pos{X = -1, Y = -1},
@@ -75,6 +75,26 @@ namespace Evolution.game
             return totalLiveCellsOfSimulation / MaxTurn;
         }
 
+        public int ShowGame(string startBoard)
+        {
+            SetLiving(startBoard);
+            DateTime _span = DateTime.Now;
+            int totalLiveCellsOfSimulation = 0;
+
+            for (int t = 0; t < MaxTurn; t++)
+            {
+                System.Threading.Thread.Sleep(10);
+                Console.Clear();
+
+                totalLiveCellsOfSimulation += generateFrame();
+                showNewFrame(); //without pausing the thread and showing frames, time spent on a simulation is 0.07 ish seconds, while 
+                                //time spent on a simulation with graphics seems to be of 0.9 ish seconds
+            }
+            Console.WriteLine("Simulation  finished, number of cells: " + totalLiveCellsOfSimulation / MaxTurn);
+            //Console.WriteLine(DateTime.Now - _span);
+            //Console.Read();
+            return totalLiveCellsOfSimulation / MaxTurn;
+        }
 
         //Render and show the next frame
         private void showNewFrame()

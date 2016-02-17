@@ -124,6 +124,7 @@ namespace Evolution.AI
 
             game.ReinitBoard();
             game.ShowGame(bestSeed.Key);
+            Console.Clear();
 
             Console.WriteLine("Best fitness of generation: " + bestSeed.Value);
             removeFromKey(bestSeed.Key, populationBuffer);
